@@ -30,8 +30,8 @@ public class UserController {
 
   @GetMapping("/users")
   public ResponseEntity<List<User>> getUsers(
-      @Param("user-name") String userName,
-      @Param("activity-name") String activityName) {
+      @Param("userName") String userName,
+      @Param("activityName") String activityName) {
     try {
       Stream<User> users = userRepository.findAll().stream();
       System.out.println("GetAllUsers(" + userName + "," +  activityName + ")");
