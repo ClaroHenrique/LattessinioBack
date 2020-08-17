@@ -1,4 +1,4 @@
-# LattessinioBack
+# Lattessinio Backend
 
 O backend do sistema de um Sistema Online de Gerenciamento de Currículos.
 
