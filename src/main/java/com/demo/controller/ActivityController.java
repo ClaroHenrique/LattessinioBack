@@ -2,6 +2,7 @@ package com.demo.controller;
 
 import com.demo.model.Activity;
 import com.demo.repository.ActivityRepository;
+import com.demo.service.ActivityService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -62,10 +63,13 @@ public class ActivityController {
 
   @PostMapping("/activities")
   public ResponseEntity<Activity> createActivity(@RequestBody Activity activity) {
+
+    if (!ActivityService.validateActivity(activity)) {
+      return new ResponseEntity<>(HttpStatus.UNPROCESSABLE_ENTITY);
+    }
+
     try {
-      System.out.println(activity);
       Activity createdActivity = activityRepository.save(activity);
-      System.out.println(createdActivity);
       return new ResponseEntity<>(createdActivity, HttpStatus.OK);
     } catch (Exception e) {
       System.out.println(e);
@@ -75,13 +79,18 @@ public class ActivityController {
 
   @PutMapping("/activities/{id}")
   public ResponseEntity<Activity> updateActivity(
-      @PathVariable("id") Long id, @RequestBody Activity user) {
+      @PathVariable("id") Long id, @RequestBody Activity activity) {
+
+    if (!ActivityService.validateActivity(activity)) {
+      return new ResponseEntity<>(HttpStatus.UNPROCESSABLE_ENTITY);
+    }
+
     try {
       Optional<Activity> activityData = activityRepository.findById(id);
 
       if (activityData.isPresent()) {
-        user.setId(id);
-        Activity updatedActivity = activityRepository.save(user);
+        activity.setId(id);
+        Activity updatedActivity = activityRepository.save(activity);
 
         return new ResponseEntity<>(updatedActivity, HttpStatus.OK);
       } else {

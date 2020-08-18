@@ -2,6 +2,7 @@ package com.demo.controller;
 
 import com.demo.model.User;
 import com.demo.repository.UserRepository;
+import com.demo.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
@@ -14,7 +15,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 import java.util.Optional;
@@ -30,16 +30,15 @@ public class UserController {
 
   @GetMapping("/users")
   public ResponseEntity<List<User>> getUsers(
-      @Param("userName") String userName,
-      @Param("activityName") String activityName) {
+      @Param("userName") String userName, @Param("activityName") String activityName) {
     try {
       Stream<User> users = userRepository.findAll().stream();
-      System.out.println("GetAllUsers(" + userName + "," +  activityName + ")");
+      System.out.println("GetAllUsers(" + userName + "," + activityName + ")");
 
-      if(userName != null && !userName.isEmpty()){
+      if (userName != null && !userName.isEmpty()) {
         users = users.filter((User u) -> u.hasNameWith(userName));
       }
-      if(activityName != null && !activityName.isEmpty()){
+      if (activityName != null && !activityName.isEmpty()) {
         users = users.filter((User u) -> u.hasActivityWithName(activityName));
       }
 
@@ -67,10 +66,14 @@ public class UserController {
 
   @PostMapping("/users")
   public ResponseEntity<User> createUser(@RequestBody User user) {
+
+    if (!UserService.validateUser(user)) {
+      return new ResponseEntity<>(HttpStatus.UNPROCESSABLE_ENTITY);
+    }
+
     try {
       user.setId(null);
       User createdUser = userRepository.save(user);
-
       return new ResponseEntity<>(createdUser, HttpStatus.OK);
     } catch (Exception e) {
       System.out.println(e);
@@ -80,9 +83,13 @@ public class UserController {
 
   @PutMapping("/users/{id}")
   public ResponseEntity<User> updateUser(@PathVariable("id") Long id, @RequestBody User user) {
+
+    if (!UserService.validateUser(user)) {
+      return new ResponseEntity<>(HttpStatus.UNPROCESSABLE_ENTITY);
+    }
+
     try {
       Optional<User> userData = userRepository.findById(id);
-
       if (userData.isPresent()) {
         user.setId(id);
         User updatedUser = userRepository.save(user);
